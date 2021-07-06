@@ -74,7 +74,7 @@ CREATE TABLE #PercentPopulationVaccinated
 (
 continent nvarchar(255),
 location nvarchar(255),
-date datetime,
+date nvarchar(255),
 population numeric,
 new_vaccinations numeric,
 total_pessoas_vacinadas numeric
@@ -82,7 +82,7 @@ total_pessoas_vacinadas numeric
 
 INSERT INTO #PercentPopulationVaccinated
 SELECT m.continent, m.location, m.date, m.population, v.new_vaccinations, 
-	SUM(CONVERT(int,v.new_vaccinations)) OVER (Partition by  m.location ORDER BY m.location) AS total_pessoas_vacinadas
+	SUM(CONVERT(bigint,v.new_vaccinations)) OVER (Partition by  m.location ORDER BY m.location) AS total_pessoas_vacinadas
 FROM CovidPortifolio..CovidDeaths m
 JOIN CovidPortifolio..CovidVaccinations v
 ON m.location = v.location AND m.date = v.date
