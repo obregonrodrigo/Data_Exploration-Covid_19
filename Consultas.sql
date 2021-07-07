@@ -1,4 +1,5 @@
 -- Data Exploration
+USE CovidPortifolio
 
 -- Total de Casos VS. Total de Mortes
 -- Mostra a porcentagem de mortes causadas por dia de covid no Brasil
@@ -69,8 +70,8 @@ SELECT *,(total_pessoas_vacinadas/population)*100
 FROM popvsvac
 
 -- TEMP TABLE
-DROP TABLE IF EXISTS #PercentPopulationVaccinated
-CREATE TABLE #PercentPopulationVaccinated
+DROP TABLE IF EXISTS #PorcentagemVacinados
+CREATE TABLE #PorcentagemVacinados
 (
 continent nvarchar(255),
 location nvarchar(255),
@@ -80,12 +81,26 @@ new_vaccinations numeric,
 total_pessoas_vacinadas numeric
 )
 
-INSERT INTO #PercentPopulationVaccinated
+INSERT INTO #PorcentagemVacinados
 SELECT m.continent, m.location, m.date, m.population, v.new_vaccinations, 
 	SUM(CONVERT(bigint,v.new_vaccinations)) OVER (Partition by  m.location ORDER BY m.location) AS total_pessoas_vacinadas
 FROM CovidPortifolio..CovidDeaths m
 JOIN CovidPortifolio..CovidVaccinations v
 ON m.location = v.location AND m.date = v.date
+WHERE m.continent IS NOT NULL
 
 SELECT *, (total_pessoas_vacinadas/population)*100
-FROM #PercentPopulationVaccinated
+FROM #PorcentagemVacinados
+
+
+-- Criação de uma View da Porcentagem da população vacinada
+CREATE VIEW PorcentagemVacinados AS
+SELECT m.continent, m.location, m.date, m.population, v.new_vaccinations, 
+	SUM(CONVERT(bigint,v.new_vaccinations)) OVER (Partition by  m.location ORDER BY m.location) AS total_pessoas_vacinadas
+FROM CovidPortifolio..CovidDeaths m
+JOIN CovidPortifolio..CovidVaccinations v
+ON m.location = v.location AND m.date = v.date
+WHERE m.continent IS NOT NULL
+
+SELECT *
+FROM PorcentagemVacinados
